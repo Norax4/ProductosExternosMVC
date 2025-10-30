@@ -34,6 +34,8 @@ namespace ProductosExternosMVC.Services
 
         [JsonPropertyName("createdAt")]
         public string? CreatedAt { get; set; }
+        [JsonPropertyName("updatedAt")]
+        public string? UpdatedAt { get; set; }
     }
 
     public class ServicioProductos : IServicioProductos
@@ -115,7 +117,8 @@ namespace ProductosExternosMVC.Services
             {
                 Nombre = nombre,
                 Precio = precio,
-                CreatedAt = DateTime.UtcNow.ToString("o")
+                CreatedAt = DateTime.UtcNow.ToString("o"),
+                UpdatedAt = DateTime.UtcNow.ToString("o")
             };
 
             string json = JsonSerializer.Serialize(nuevoProducto);

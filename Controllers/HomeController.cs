@@ -33,6 +33,40 @@ namespace ProductosExternosMVC.Controllers
 
             return RedirectToAction("Index");
         }
+        [HttpGet]
+        public async Task<IActionResult> BorrarProducto(string id)
+        {
+            ServicioProductos servicioProductos = new ServicioProductos();
+            await servicioProductos.Borrar(id);
+            return RedirectToAction("Index"); //Funciona correctamente
+        }
+
+        public async Task<IActionResult> Modificar(string id)
+        {
+            ServicioProductos servicioProductos = new ServicioProductos();
+            ProductoDto productoDto = await servicioProductos.Buscar(id);
+
+            if (productoDto == null)
+            {
+                return View("Index");
+            }
+
+            return View(productoDto);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ModificarProducto(ModificarProductoDto productoModif)
+        {
+            ServicioProductos servicioProductos = new ServicioProductos();
+            ProductoDto producto = await servicioProductos.Buscar(productoModif.id);
+
+            producto.Nombre = productoModif.nombre;
+            producto.Precio = productoModif.precio;
+            producto.UpdatedAt = DateTime.Now.ToString("o");
+
+            await servicioProductos.Modificar(producto);
+            return RedirectToAction("Index");
+        }
 
         public IActionResult Privacy()
         {
