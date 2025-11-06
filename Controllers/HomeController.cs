@@ -8,43 +8,47 @@ namespace ProductosExternosMVC.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IServicioProductos _servicioProductos;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IServicioProductos servicioProds)
         {
             _logger = logger;
+            _servicioProductos = servicioProds;
         }
 
         public async Task<IActionResult> Index()
         {
-            ServicioProductos servicioProductos = new ServicioProductos();
-
-            ViewBag.Productos = await servicioProductos.Todos();
+            ViewBag.Productos = await _servicioProductos.Todos();
 
             return View();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ResultadoBusqueda(string nombre)
+        {
+            ViewBag.ProductosBuscados = await _servicioProductos.BuscarPorNombre(nombre);
+            Console.WriteLine(ViewBag.ProductosBuscados.Count);
+
+            return View();
+        }
+
         [HttpPost]
         public async Task<IActionResult> CrearProducto(CrearProductoDto _crearProductoDto)
         {
-            // Validaciones varias
-            // ....
-
-            ServicioProductos servicioProductos = new ServicioProductos();
-            ProductoDto? producto = await servicioProductos.CrearProducto(_crearProductoDto.nombre, _crearProductoDto.precio);
+            await _servicioProductos.CrearProducto(_crearProductoDto);
 
             return RedirectToAction("Index");
         }
         [HttpGet]
         public async Task<IActionResult> BorrarProducto(string id)
         {
-            ServicioProductos servicioProductos = new ServicioProductos();
-            await servicioProductos.Borrar(id);
+            await _servicioProductos.Borrar(id);
             return RedirectToAction("Index"); //Funciona correctamente
         }
 
         public async Task<IActionResult> Modificar(string id)
         {
-            ServicioProductos servicioProductos = new ServicioProductos();
-            ProductoDto productoDto = await servicioProductos.Buscar(id);
+            ProductoDto productoDto = await _servicioProductos.Buscar(id);
 
             if (productoDto == null)
             {
@@ -57,14 +61,8 @@ namespace ProductosExternosMVC.Controllers
         [HttpPost]
         public async Task<IActionResult> ModificarProducto(ModificarProductoDto productoModif)
         {
-            ServicioProductos servicioProductos = new ServicioProductos();
-            ProductoDto producto = await servicioProductos.Buscar(productoModif.id);
-
-            producto.Nombre = productoModif.nombre;
-            producto.Precio = productoModif.precio;
-            producto.UpdatedAt = DateTime.Now.ToString("o");
-
-            await servicioProductos.Modificar(producto);
+            Console.WriteLine(productoModif.precio);
+            await _servicioProductos.Modificar(productoModif);
             return RedirectToAction("Index");
         }
 

@@ -16,14 +16,29 @@
 
         <button type="submit">Crear Producto</button>
     </form>
-    <ul>
-        @foreach(ProductosExternosMVC.Services.ProductoDto producto in ViewBag.Productos)
-        {
-            <li>@producto.Nombre - @producto.Precio - @producto.CreatedAt - @producto.UpdatedAt <a href="@Url.Action("BorrarProducto", "Home", new {id = producto.Id})" 
-                class="btn btn-secondary">X</a>
-                <a href="@Url.Action("Modificar", "Home", new {id = producto.Id})">Editar</a></li> 
-        }
-    </ul>
+
+    <form method="get" action="/Home/ResultadoBusqueda">
+        <label>Nombre:
+            <input type="text" name="nombre" placeholder="Nombre del producto" required />
+        </label>
+        <button type="submit">Buscar Productos</button>
+    </form>
+
+    @if (ViewBag.Productos.Count <= 0)
+    {
+            <h4>No se encontraron productos con el nombre ingresado.</h4>
+    }
+    else
+    {
+        <ul>
+            @foreach(ProductosExternosMVC.Services.ProductoDto producto in ViewBag.Productos)
+            {
+                <li>@producto.Nombre - @producto.Precio - @producto.CreatedAt - @producto.UpdatedAt <a href="@Url.Action("BorrarProducto", "Home", new {id = producto.Id})" 
+                    class="btn btn-secondary">X</a>
+                    <a href="@Url.Action("Modificar", "Home", new {id = producto.Id})">Editar</a></li> 
+            }
+        </ul>
+    }
 </div>
 
 

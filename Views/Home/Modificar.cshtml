@@ -11,7 +11,7 @@
             <input type="text" name="nombre" value="@Model.Nombre" required />
         </label>
         <label>Precio:
-            <input type="number" name="precio" value="@Model.Precio" required />
+            <input type="number" name="precio" value="@Model.Precio" step="any" placeholder="@Model.Precio" required />
         </label>
         <button type="submit">Guardar Cambios</button>
     </form>

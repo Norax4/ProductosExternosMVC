@@ -1,0 +1,35 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<div class="text-center">
+    <h2>Resultados de la Búsqueda</h2>
+    <form method="get" action="/Home/ResultadoBusqueda">
+        <label>
+            Nombre:
+            <input type="text" name="nombre" placeholder="Nombre del producto" required />
+        </label>
+        <button type="submit">Buscar Productos</button>
+    </form>
+
+    @if (ViewBag.ProductosBuscados.Count <= 0)
+    {
+            <h4>No se encontraron productos con el nombre ingresado.</h4>
+    }
+    else
+    {
+        <h4> Productos encontrados: @(ViewBag.ProductosBuscados.Count)</h4>
+            <ul>
+            @foreach (ProductosExternosMVC.Services.ProductoDto producto in ViewBag.ProductosBuscados)
+            {
+                <li>
+                    @producto.Nombre - @producto.Precio - @producto.CreatedAt - @producto.UpdatedAt 
+                    <a href="@Url.Action("BorrarProducto", "Home", new { id = producto.Id })" class="btn btn-secondary">X</a>
+                    <a href="@Url.Action("Modificar", "Home", new { id = producto.Id })">Editar</a>
+                </li>
+            }
+            </ul>
+    }
+</div>

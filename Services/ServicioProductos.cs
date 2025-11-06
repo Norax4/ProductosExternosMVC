@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProductosExternosMVC.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.Marshalling;
@@ -11,11 +12,12 @@ namespace ProductosExternosMVC.Services
 {
     public interface IServicioProductos
     {
-        Task<ProductoDto> CrearProducto(string nombre, string precio);
+        Task CrearProducto(CrearProductoDto crearProductoDto);
         Task BuscarMostrar(string id);
+        Task<List<ProductoDto>> BuscarPorNombre(string nombre);
         Task<ProductoDto> Buscar(string id);
         Task Borrar(string id);
-        Task Modificar(ProductoDto productoDto);
+        Task Modificar(ModificarProductoDto productoDto);
         Task<List<ProductoDto>> Todos();
     }
 
@@ -24,18 +26,18 @@ namespace ProductosExternosMVC.Services
     public class ProductoDto
     {
         [JsonPropertyName("id")]
-        public string? Id { get; set; }
+        public int? Id { get; set; }
 
         [JsonPropertyName("nombre")]
         public string? Nombre { get; set; }
 
         [JsonPropertyName("precio")]
-        public string? Precio { get; set; }
+        public decimal? Precio { get; set; }
 
         [JsonPropertyName("createdAt")]
-        public string? CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
         [JsonPropertyName("updatedAt")]
-        public string? UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 
     public class ServicioProductos : IServicioProductos
@@ -45,13 +47,13 @@ namespace ProductosExternosMVC.Services
 
         public ServicioProductos()
         {
-            _apiUrl = "https://68ffe1e9e02b16d1753f8cfe.mockapi.io/api/v1/productos";
+            _apiUrl = "https://localhost:7221/api/Producto";
             _httpClient = new HttpClient();
         }
 
         public async Task<ProductoDto> Buscar(string id)
         {
-            HttpResponseMessage response = await _httpClient.GetAsync($"{_apiUrl}/{id}");
+            HttpResponseMessage response = await _httpClient.GetAsync($"{_apiUrl}/id?id={id}");
             if (response.IsSuccessStatusCode)
             {
                 string json = await response.Content.ReadAsStringAsync();
@@ -65,14 +67,28 @@ namespace ProductosExternosMVC.Services
             }
         }
 
-        public async Task Modificar(ProductoDto productoDto)
+        public async Task<List<ProductoDto>> BuscarPorNombre(string name)
+        {
+            HttpResponseMessage response = await _httpClient.GetAsync($"{_apiUrl}/name?name={name}");
+            if (response.IsSuccessStatusCode)
+            {
+                string json = await response.Content.ReadAsStringAsync();
+                List<ProductoDto> productos = JsonSerializer.Deserialize<List<ProductoDto>>(json);
+                return productos;
+            } else
+            {
+                return new List<ProductoDto>();
+            }
+        }
+
+        public async Task Modificar(ModificarProductoDto productoDto)
         {
             string json = JsonSerializer.Serialize(productoDto);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
-            HttpResponseMessage response = await _httpClient.PutAsync($"{_apiUrl}/{productoDto.Id}", content);
+            HttpResponseMessage response = await _httpClient.PutAsync($"{_apiUrl}/{productoDto.id}", content);
             if (response.IsSuccessStatusCode)
             {
-                Console.WriteLine($"Producto con ID {productoDto.Id} modificado correctamente.");
+                Console.WriteLine($"Producto con ID {productoDto.id} modificado correctamente.");
             }
             else
             {
@@ -111,32 +127,20 @@ namespace ProductosExternosMVC.Services
                 Console.WriteLine($"Error al buscar el producto: {response.StatusCode}");
             }
         }
-        public async Task<ProductoDto?> CrearProducto(string nombre, string precio)
+        public async Task CrearProducto(CrearProductoDto crearProductoDto)
         {
-            ProductoDto nuevoProducto = new ProductoDto
-            {
-                Nombre = nombre,
-                Precio = precio,
-                CreatedAt = DateTime.UtcNow.ToString("o"),
-                UpdatedAt = DateTime.UtcNow.ToString("o")
-            };
-
-            string json = JsonSerializer.Serialize(nuevoProducto);
+            string json = JsonSerializer.Serialize(crearProductoDto);
             StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
             HttpResponseMessage response = await _httpClient.PostAsync(_apiUrl, content);
 
             if (response.IsSuccessStatusCode)
             {
-                string respuestaJson = await response.Content.ReadAsStringAsync();
-                ProductoDto productoCreado = JsonSerializer.Deserialize<ProductoDto>(respuestaJson)!;
-
-                return productoCreado;
+                Console.WriteLine("Producto creado correctamente.");
             }
             else
             {
                 Console.WriteLine($"Error al crear el producto: {response.StatusCode}");
-                return null;
             }
         }
         public async Task<List<ProductoDto>> Todos()
